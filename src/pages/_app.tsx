@@ -30,6 +30,9 @@ import { remoteLoader } from '@lingui/remote-loader'
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 
+// migrate from cronaswapv1
+import { RefreshContextProvider } from 'contexts/RefreshContext'
+
 const Web3ProviderNetwork = dynamic(() => import('../components/Web3ProviderNetwork'), { ssr: false })
 
 // const Web3ReactManager = dynamic(() => import('../components/Web3ReactManager'), { ssr: false })
@@ -167,11 +170,14 @@ function MyApp({
                     <MulticallUpdater />
                   </>
                   <Provider>
-                    <Layout>
-                      <Guard>
-                        <Component {...pageProps} />
-                      </Guard>
-                    </Layout>
+                    {/* // migrate from cronaswapv1 */}
+                    <RefreshContextProvider>
+                      <Layout>
+                        <Guard>
+                          <Component {...pageProps} />
+                        </Guard>
+                      </Layout>
+                    </RefreshContextProvider>
                   </Provider>
                 </PersistGate>
               </ReduxProvider>
