@@ -29,6 +29,7 @@ import { useSingleCallResult } from 'app/state/multicall/hooks'
 import CoinTossBetModal from 'app/components/CoinTossBetModal'
 import { GameType, GameReview, GameBetStatus } from 'app/features/gamefi'
 import { useTransactionAdder } from 'app/state/transactions/hooks'
+import { GAMEFI_SERVER } from 'app/constants/gamefi'
 const { default: axios } = require('axios')
 
 export default function CoinToss() {
@@ -137,7 +138,7 @@ export default function CoinToss() {
   const addTransaction = useTransactionAdder()
   const placebet = async (signature) => {
     try {
-      const response = await axios.get('https://gamefi.cronaswap.org/placebet', {
+      const response = await axios.get(GAMEFI_SERVER, {
         params: {
           game: 'CoinToss',
           player: account,
@@ -153,7 +154,12 @@ export default function CoinToss() {
       console.log(response)
       const betPlaceResponse = response?.data
       router.push('#')
-      if (betPlaceResponse?.error) throw new Error(betPlaceResponse?.error)
+      if (betPlaceResponse?.error) {
+        let reason = betPlaceResponse?.error
+        if (reason?.indexOf('execution reverted: ') === 0) reason = reason.substr('execution reverted: '.length)
+
+        throw new Error(reason)
+      }
 
       setCoinTossBetState({
         coinTossResult: betPlaceResponse?.result,

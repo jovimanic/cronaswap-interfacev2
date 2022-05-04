@@ -9,7 +9,7 @@ import NavLink from 'app/components/NavLink'
 import GameReviewPanel from 'app/components/GameReviewPanel'
 import { DiceRollVolumePanel } from 'app/components/DiceRollVolumePanel'
 import { DiceRollBetPanel } from 'app/components/DiceRollBetPanel'
-import { DiceRollOption } from 'app/constants/gamefi'
+import { DiceRollOption, GAMEFI_SERVER } from 'app/constants/gamefi'
 import { DiceRollClaimRewardStatus, DiceRollStatus } from 'app/features/gamefi/diceroll/enum'
 import { useCurrency, useGameFiTokens } from 'app/hooks/Tokens'
 import { CRONA_ADDRESS, Currency, CurrencyAmount, Token } from '@cronaswap/core-sdk'
@@ -157,7 +157,7 @@ const DiceRoll = () => {
       for (let i = 0; i < 6; i++) {
         diceRollOptionStr += diceRollOption[i] ? '1' : '0'
       }
-      const response = await axios.get('https://gamefi.cronaswap.org/placebet', {
+      const response = await axios.get(GAMEFI_SERVER, {
         params: {
           game: 'DiceRoll',
           player: account,
@@ -173,7 +173,12 @@ const DiceRoll = () => {
       console.log(response)
       const betPlaceResponse = response?.data
       router.push('#')
-      if (betPlaceResponse?.error) throw new Error(betPlaceResponse?.error)
+      if (betPlaceResponse?.error) {
+        let reason = betPlaceResponse?.error
+        if (reason?.indexOf('execution reverted: ') === 0) reason = reason.substr('execution reverted: '.length)
+
+        throw new Error(reason)
+      }
 
       setDiceRollBetState({
         diceRollResult: betPlaceResponse?.result,
